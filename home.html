@@ -1,88 +1,231 @@
-<!doctype html> 
+<!doctype html>
 
 <html>
+
 <head>
     <title>Labyrinthe</title>
     <script language="JavaScript">
-        m='m'; //représente un mur
-        p='p'; //représente le personnage
-        b='b'; //représente le chemin
-        f="f"; //représente le trophée 
 
-        xperso=1; //position initial du personnage sur l'axe X
-        yperso=1; //postition initial du personnage sur l'axe Y
+        document.onkeydown = checkKey;
+
+        min = 0;
+        second = 00;
+        zeroPlaceholder = 0;
+
+        m = 'm'; //représente un mur
+        p = 'p'; //représente le personnage
+        b = 'b'; //représente le chemin
+        f = "f"; //représente le trophée 
+        xperso = 1; //position initial du personnage sur l'axe X
+        yperso = 1; //postition initial du personnage sur l'axe Y4
+        pas = 0;
+
         //tableau à double entrée représentant votre labyrinthe, vous pouvez le modifier pour comprendre le fonctionnement
-        var laby = [[m,m,m,m,m,m,m,m,m,m],
-                    [m,p,m,b,b,b,b,b,b,m],
-                    [m,b,m,b,m,m,m,b,m,m],
-                    [m,b,m,b,m,b,m,b,b,m],
-                    [m,b,b,b,m,b,m,m,b,m],
-                    [m,b,m,b,m,b,b,b,b,f],
-                    [m,m,m,m,m,m,m,m,m,m]];
-     
-                  
-      
-         
-        function afficheLaby() //ne rien modifier dans cette fonction
-        {
-            var leLaby=document.getElementById("laby");
-            insertion="<table border=0 cellspacing=0 cellpadding=0>";
-         
-         
-            for(i=0;i<7;i++)
-            {
-            insertion+="<tr>";
-                for(j=0;j<10;j++)
-                {
-                 
-                    if (laby[i][j]==m)
-                    {
-                    insertion+="<td>";
-                    insertion+="<img width='52'height='52' src='Assets/stonewall.png'>";
-                    insertion+="</td>";
-                    }
-                    if (laby[i][j]==p)
-                    {
-                    insertion+="<td>";
-                    insertion+="<img width='52' height='52' style='background-image:Assets/Ground.png' src='Assets/Heros.png'>";
-                    insertion+="</td>";
-                    }
-                    if (laby[i][j]==b)
-                    {
-                    insertion+="<td>";
-                    insertion+="<img width='52' height='52' src='Assets/Ground.png'>";
-                    insertion+="</td>";
-                    }
+        var laby = [
+            [m, m, m, m, m, m, m, m, m, m],
+            [m, p, m, b, b, b, b, b, b, m],
+            [m, b, m, b, m, m, m, b, m, m],
+            [m, b, m, b, m, b, m, b, b, m],
+            [m, b, b, b, m, b, m, m, b, m],
+            [m, b, m, b, m, b, b, b, b, f],
+            [m, m, m, m, m, m, m, m, m, m]
+        ];
 
-                     
-                    if (laby[i][j]==f)
-                    {
-                    insertion+="<td>";
-                    insertion+="<img width='52' height='52'src='Assets/Trophy.png'>";
-                    insertion+="</td>";
-                    }
-                     
-             
-                     
-                }
-                insertion+="</tr>";
-            }  
-             
-            insertion+="</table>";
-            leLaby.innerHTML=insertion;
+        //Écoute les touches appuyées afin de lancer les fonctions de déplacement
+        document.addEventListener('keydown', function (key) {
+            switch (key.keyCode) {
+                case 37:
+                    left()
+                    break;
+                case 38:
+                    up()
+                    break;
+                case 39:
+                    right()
+                    break;
+                case 40:
+                    down()
+                    break;
+            }
+        });
+
+        function start() {
+            setInterval(function () {
+                timer();
+            }, 1000);
+            document.getElementById("boutons").style.display = "";
+            document.getElementById("timer").style.display = "";
+            document.getElementById("go").style.display = "none";
+            afficheLaby();
         }
-         
+
+        function afficheLaby() { //ne rien modifier dans cette fonction
+            
+            var leLaby = document.getElementById("laby");
+            insertion = "<table border=0 cellspacing=0 cellpadding=0>";
+
+            for (i = 0; i < 7; i++) {
+                insertion += "<tr>";
+
+                for (j = 0; j < 10; j++) {
+                    if (laby[i][j] == m) {
+                        insertion += "<td>";
+                        insertion += "<img width='52'height='52' src='Assets/stonewall.png'>";
+                        insertion += "</td>";
+                    }
+                    if (laby[i][j] == p) {
+                        insertion += "<td>";
+                        insertion += "<img width='52' height='52' style='background-image:Assets/Ground.png' src='Assets/Heros.png'>";
+                        insertion += "</td>";
+                    }
+                    if (laby[i][j] == b) {
+                        insertion += "<td>";
+                        insertion += "<img width='52' height='52' src='Assets/Ground.png'>";
+                        insertion += "</td>";
+                    }
+                    if (laby[i][j] == f) {
+                        insertion += "<td>";
+                        insertion += "<img width='52' height='52'src='Assets/Trophy.png'>";
+                        insertion += "</td>";
+                    }
+                }
+                insertion += "</tr>";
+            }
+            insertion += "</table>";
+            leLaby.innerHTML = insertion;
+        }
+
+        function timer() {
+
+            second++;
+            if (second == 59) {
+                second = 00;
+                min = min + 1;
+            }
+            if (second == 10) {
+                zeroPlaceholder = '';
+            } else
+                if (second == 00) {
+                    zeroPlaceholder = 0;
+                }
+
+            document.getElementById("timer").innerText = min + ':' + zeroPlaceholder + second;
+        }
+
+        function up() {
+            if (laby[yperso - 1][xperso] === f) {
+                laby[yperso][xperso] = b;
+                yperso--;
+                laby[yperso][xperso] = p;
+                afficheLaby();
+                end()
+            }
+            if (laby[yperso - 1][xperso] === m) {
+            } else {
+                laby[yperso][xperso] = b;
+                yperso--;
+                laby[yperso][xperso] = p;
+                afficheLaby()
+                pas = pas += 1;
+            }
+        }
+
+        function down() {
+            if (laby[yperso + 1][xperso] === f) {
+                laby[yperso][xperso] = b;
+                yperso++;
+                laby[yperso][xperso] = p;
+                afficheLaby();
+                end()
+            }
+            if (laby[yperso + 1][xperso] === m) {
+            } else {
+                laby[yperso][xperso] = b;
+                yperso++;
+                laby[yperso][xperso] = p;
+                afficheLaby()
+                pas = pas += 1;
+            }
+        }
+
+        function left() {
+            if (laby[yperso][xperso - 1] === f) {
+                laby[yperso][xperso] = b;
+                xperso--;
+                laby[yperso][xperso] = p;
+                afficheLaby();
+                end()
+            }
+            if (laby[yperso][xperso - 1] === m) {
+            } else {
+                laby[yperso][xperso] = b;
+                xperso--;
+                laby[yperso][xperso] = p;
+                afficheLaby()
+                pas = pas += 1;
+            }
+        }
+
+        function right() {
+            if (laby[yperso][xperso + 1] === f) {
+                laby[yperso][xperso] = b;
+                xperso++;
+                laby[yperso][xperso] = p;
+                afficheLaby();
+                end()
+            }
+            if (laby[yperso][xperso + 1] === m) {
+            } else {
+                laby[yperso][xperso] = b;
+                xperso++;
+                laby[yperso][xperso] = p;
+                afficheLaby()
+                pas = pas += 1;
+            }
+        }
+
+        function end() {
+            document.getElementById("boutons").style.display = "none";
+            document.getElementById("timer").style.display = "none";
+            document.getElementById("laby").style.display = "none";
+            document.getElementById("titre").innerHTML = "Rechargez la page si vous voulez rejouer.";
+            if (min == '0') {
+                alert("Bravo, tu as terminé ce labyrinthe en " + second + " secondes et en " + pas + " pas !\r\nRechargez la page si vous voulez rejouer.")
+            } else {
+                alert("Bravo, tu as terminé ce labyrinthe en " + min + " minutes, " + second + " secondes et en " + pas + " pas !\r\nRechargez la page si vous voulez rejouer.")
+            }
+        }
+
+        function checkKey(key) {
+            key = key || window.event;
+            if (key.keyCode == '38') {
+                // up arrow
+            }
+            else if (key.keyCode == '40') {
+                // down arrow
+            }
+            else if (key.keyCode == '37') {
+                // left arrow
+            }
+            else if (key.keyCode == '39') {
+                // right arrow
+            }
+        }
+
     </script>
 </head>
-    <body>
-        <div id="laby">
- 
-        </div>
 
-    <input type="button" value="GO" onclick="afficheLaby();"><br/><BR><BR>
-
-    <!-- ajouter vos boutons de déplacement ici -->
-
- 
+<body>
+    <h1 id="titre">Le Labyrinthe</h1>
+    <h2><span id="timer" style="display:none">0:00</span></h2>
+    <div id="laby"></div><br />
+    <input id="go" type="button" value="Lancer !" onclick="start();" style="display:block"><br />
+    <div id="boutons" style="display:none">
+        <input type="button" value="Up" onclick="up();" style="margin-left: 25px;"><br /><br />
+        <input type="button" value="Left" onclick="left();">
+        <input type="button" value="Right" onclick="right();" style="margin-left: 5px;"><br /><br />
+        <input type="button" value="Down" onclick="down();" style="margin-left: 20px;"><br /><br />
+    </div>
 </body>
+
 </html>
